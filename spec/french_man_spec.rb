@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe FrenchMan::Baguette do
+describe FrenchMan do
   let(:resulting_blueprint) {
     {
       :username => 'francois',
@@ -26,35 +26,35 @@ describe FrenchMan::Baguette do
   }
 
   before do
-    FrenchMan::Baguette.blueprint(:login) {
+    FrenchMan::Login.blueprint {
       username { 'francois' }
       password { 'baguette' }
     }
 
-    FrenchMan::Baguette.blueprint(:grocery) {
+    FrenchMan::Grocery.blueprint {
       garlic { true }
     }
 
-    FrenchMan::Baguette.blueprint(:vino) {
+    FrenchMan::Vino.blueprint {
       red { 'tempranillo' }
       white { 'sav' }
     }
 
-    FrenchMan::Baguette.blueprint(:other_item) {
+    FrenchMan::OtherItem.blueprint {
       name { 'one' }
       num { 1 }
     }
   end
 
   it "should build a hash using a dsl" do
-    build = FrenchMan::Baguette.plan(:login) {
+    build = FrenchMan::Login.plan {
       groceries {
-        FrenchMan::Baguette.plan(:grocery) {
-          vino { FrenchMan::Baguette.plan(:vino) }
+        FrenchMan::Grocery.plan {
+          vino { FrenchMan::Vino.plan }
           other_items {
             [
-              FrenchMan::Baguette.plan(:other_item),
-              FrenchMan::Baguette.plan(:other_item) {
+              FrenchMan::OtherItem.plan,
+              FrenchMan::OtherItem.plan {
                 name { 'two' }
                 num { 2 }
               }
@@ -63,30 +63,6 @@ describe FrenchMan::Baguette do
         }
       }
     }
-    puts build
     build.should == resulting_blueprint
-  end
-
-  it "should recursively merge a hash" do
-
-    #to_merge = {
-    #  :username => 'vivian',
-    #  :groceries => {
-    #    :other_items => [
-    #      {
-    #        :name => 'three',
-    #        :id => 3
-         # }
-    #    ]
-    #  }
-    #}
-
-    #merged = FrenchMan::Baguette.make(:login) { to_merge }
-
-    #what_should_be = hash.dup
-    #what_should_be[:username] = to_merge[:username]
-    #what_should_be[:groceries][:other_items] = to_merge[:groceries][:other_items]
-
-    #merged.should == what_should_be
   end
 end
