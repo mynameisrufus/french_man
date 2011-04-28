@@ -68,11 +68,26 @@ class FrenchMan
         value = @hash[attribute_name]
         plan[attribute_name] = value.respond_to?(:call) ? value.call : value
       end
-      plan
+      ObjectifiedHash.new plan
     end
 
     def method_missing(attribute, &block) #:nodoc:
       @hash.merge!(attribute => block)
+    end
+  end
+
+  class ObjectifiedHash
+    def initialize(attributes = {})
+      @attributes = attributes
+    end
+
+    def method_missing(name, *args)
+      if @attributes.has_key? name
+        value = @attributes[name]
+        value.is_a?(Hash) ? ObjectifiedHash.new(value) : value
+      else
+        @attributes.send name, *args
+      end
     end
   end
 end
