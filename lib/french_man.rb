@@ -1,4 +1,3 @@
-require 'deep_merge'
 # Constructs blueprints and assembles plans and has long holidays
 #
 # Example usage:
@@ -85,7 +84,6 @@ class FrenchMan
     def method_missing(name, *args) #:nodoc:
       if @attributes.has_key? name
         value = @attributes[name]
-        value.is_a?(Hash) ? ObjectifiedHash.new(value) : value
       else
         @attributes.send name, *args
       end
