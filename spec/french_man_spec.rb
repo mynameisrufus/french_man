@@ -65,4 +65,24 @@ describe FrenchMan do
     }
     build.should == resulting_blueprint
   end
+
+  it "should return objectified hash objects" do
+    build = FrenchMan::Login.plan {
+      groceries {
+        FrenchMan::Grocery.plan {
+          vino {
+            FrenchMan::Vino.plan {
+              red { "Syrah" }
+              white { "Cabernet Sauvignon" }
+            }
+          }
+          cheeses {
+            ['Camembert', 'Crotin du Chavignol']
+          }
+        }
+      }
+    }
+    build.groceries.vino.red.should == "Syrah"
+    build.groceries.cheeses.should == ['Camembert', 'Crotin du Chavignol']
+  end
 end

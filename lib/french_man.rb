@@ -1,52 +1,47 @@
 require 'deep_merge'
-
+# Constructs blueprints and assembles plans and has long holidays
+#
+# Example usage:
+#   FrenchMan::Login.blueprint {
+#     username { Faker.name }
+#     password { 'baguette' }
+#   }
+#
+#
+#   login = FrenchMan::Login.plan {
+#     username { 'francois' }
+#   }
+#   
+#   login.username
+#   => 'francois'
+# 
+#   login.password
+#   => 'baguette'
 class FrenchMan
   VERSION = "0.0.1"
 
-  #@@blueprints = {}
-  
-  def self.const_missing(name)
-    clazz = Class.new
-    clazz.instance_eval do
-      def blueprint(&block)
+  def self.const_missing(name) #:nodoc:
+    clazz = Class.new do
+      def self.blueprint(&block) 
         blueprint = Blueprint.new &block
-        self.send(:class_variable_set, :@@blueprint, blueprint)
+        send(:class_variable_set, :@@blueprint, blueprint)
       end
 
-      def plan(&block)
+      def self.plan(&block)
+        blueprint = send(:class_variable_get, :@@blueprint)
+        raise "blueprint is missing" if blueprint.nil?
         plan = Plan.new &block
-        self.send(:class_variable_get, :@@blueprint).merge plan.hash
+        blueprint.merge plan.hash
       end
     end
     self.const_set name, clazz
   end
-
-  # Constructs a blueprint for future use
-  #
-  # Example:
-  #   FrenchMan.blueprint {
-  #     name { 'francois' }
-  #     password { 'baguette' }
-  #   }
-  #
-  #def self.blueprint(name, &block)
-  #  @@blueprints[name] = Blueprint.new &block
-  #end
   
-  # Create a new hash from a blueprint
-  #   
-  #     vinos { [Vino.new("Grenache"), Vino.new("Merlot")] }
-  #def self.plan(name, &block)
-  #  blueprint = @@blueprints[name]
-  #  raise "blueprint #{name} is not defined" if blueprint.nil?
-  #  plan = Plan.new &block
-  #  blueprint.merge plan.hash
-  #end
-  
+  # Creates a new plan hash for merging with a blueprint
   class Plan
     attr_reader :hash
 
-    def initialize(&block)
+    def initialize(&block) #:nodoc:
       @hash = {}
       instance_eval &block unless block.nil?
     end
@@ -56,12 +51,15 @@ class FrenchMan
     end
   end
 
+  # The blueprint to create hashes from
   class Blueprint
-    def initialize(&block)
+    def initialize(&block) #:nodoc:
       @hash = {}
       instance_eval &block
     end
-
+    
+    # takes a hash as an argument and merges it with a the blueprint
+    # hash and returns the hash wrapped in an +ObjectifiedHash+ object
     def merge(plan)
       attribute_names = @hash.keys - plan.keys
       attribute_names.each do |attribute_name|
@@ -75,13 +73,16 @@ class FrenchMan
       @hash.merge!(attribute => block)
     end
   end
-
+  
+  # Wraper for plan hashes so dot syntax can be used
   class ObjectifiedHash
-    def initialize(attributes = {})
+    undef_method :==, :===, :=~
+
+    def initialize(attributes = {}) #:nodoc:
       @attributes = attributes
     end
 
-    def method_missing(name, *args)
+    def method_missing(name, *args) #:nodoc:
       if @attributes.has_key? name
         value = @attributes[name]
         value.is_a?(Hash) ? ObjectifiedHash.new(value) : value
