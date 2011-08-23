@@ -44,6 +44,10 @@ describe FrenchMan do
       name { 'one' }
       num { 1 }
     }
+
+    FrenchMan::TestType.blueprint {
+      type { 'test' }
+    }
   end
 
   it "should build a hash using a dsl" do
@@ -84,5 +88,10 @@ describe FrenchMan do
     }
     build.groceries.vino.red.should == "Syrah"
     build.groceries.cheeses.should == ['Camembert', 'Crotin du Chavignol']
+  end
+
+  it "should handle type in object" do
+    test_type = FrenchMan::TestType.plan
+    test_type[:type].should == 'test'
   end
 end

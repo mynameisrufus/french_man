@@ -17,7 +17,7 @@
 #   login.password
 #   => 'baguette'
 class FrenchMan
-  VERSION = "0.0.1"
+  VERSION = "0.0.2"
 
   def self.const_missing(name) #:nodoc:
     clazz = Class.new do
@@ -54,7 +54,7 @@ class FrenchMan
 
   # The blueprint to create hashes from
   class Blueprint
-    undef_method :id
+    undef_method :id, :type
 
     def initialize(&block) #:nodoc:
       @hash = {}
