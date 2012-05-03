@@ -38,7 +38,7 @@ class FrenchMan
   
   # Creates a new plan hash for merging with a blueprint
   class Plan
-    undef_method :id
+    undef_method :id if method_defined?(:id)
 
     attr_reader :hash
 
@@ -54,7 +54,8 @@ class FrenchMan
 
   # The blueprint to create hashes from
   class Blueprint
-    undef_method :id, :type
+    undef_method :id if method_defined?(:id)
+    undef_method :type if method_defined?(:type)
 
     def initialize(&block) #:nodoc:
       @hash = {}
@@ -77,9 +78,9 @@ class FrenchMan
     end
   end
   
-  # Wraper for plan hashes so dot syntax can be used
   class ObjectifiedHash
-    undef_method :==, :===, :=~, :id
+    undef_method :id if method_defined?(:id)
+    undef_method :==, :===, :=~
 
     def initialize(attributes = {}) #:nodoc:
       @attributes = attributes
