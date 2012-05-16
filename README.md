@@ -2,7 +2,7 @@
 
 Hash and object mocking
 
-## Usage
+## Basic Example
 
 ``` ruby
 groceries = FrenchMan::Grocery.blueprint {
@@ -10,37 +10,30 @@ groceries = FrenchMan::Grocery.blueprint {
 }
 
 groceries.garlic #=> true
-
-vino = FrenchMan::Vino.blueprint {
-  red { 'tempranillo' }
-  white { 'sav' }
-}
-
-vino.red #=> "tempranillo"
+groceries[:garlic] #=> true
 ```
 
-## More Usage
+## Bigger Example
 
 ``` ruby
-shopping = FrenchMan::Foodofafa.plan {
-  groceries {
-    FrenchMan::Grocery.plan {
-      vino {
-        FrenchMan::Vino.plan {
-          red { "Syrah" }
-          white { "Cabernet Sauvignon" }
-        }
-      }
-      cheeses {
-        ['Camembert', 'Crotin du Chavignol']
-      }
+groceries = FrenchMan::Grocery.plan {
+  vino {
+    FrenchMan::Vino.plan {
+      red { "Syrah" }
+      white { "Cabernet Sauvignon" }
     }
+  }
+  cheeses {
+    ['Camembert', 'Crotin du Chavignol']
   }
 }
 
-# object style
-shopping.groceries.vino.red #=> "Syrah"
+groceries.vino.red #=> "Syrah"
+```
 
-# hash style
-shopping[:groceries][:vino][:red] #=> "Syrah"
+## Hash Example
+```ruby
+groceries = FrenchMan::Grocery.plan :vino => { :red => "Syrah", :white => "Cabernet Sauvignon"}
+
+groceries.vino.red #=> "Syrah"
 ```
