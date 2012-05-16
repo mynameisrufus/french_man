@@ -70,8 +70,13 @@ describe FrenchMan do
     build.should == resulting_blueprint
   end
 
-  it "should return objectified hash objects" do
-    build = FrenchMan::Login.plan {
+  it "should handle type in object" do
+    test_type = FrenchMan::TestType.plan
+    test_type[:type].should == 'test'
+  end
+
+  let(:shopping) {
+    FrenchMan::Login.plan {
       groceries {
         FrenchMan::Grocery.plan {
           vino {
@@ -86,11 +91,25 @@ describe FrenchMan do
         }
       }
     }
-    build.groceries.vino.red.should == "Syrah"
-    build.groceries.cheeses.should == ['Camembert', 'Crotin du Chavignol']
+  }
+
+  it "should return objectified hash objects" do
+    shopping.groceries.vino.red.should == "Syrah"
+    shopping[:groceries][:vino][:red].should == "Syrah"
   end
 
-  it "should handle type in object" do
+  it "should return objectified hash objects" do
+    shopping.groceries.cheeses.should == ['Camembert', 'Crotin du Chavignol']
+    shopping[:groceries][:cheeses].should == ['Camembert', 'Crotin du Chavignol']
+  end
+
+  it "should be able to use hash syntax for plan" do
+    hash = FrenchMan::Login.plan :grocery => { :vino => { :red => "Syrah", :white => "Cabernet Sauvignon"} }
+    hash.grocery.vino.red.should == "Syrah"
+    hash[:grocery][:vino][:red].should == "Syrah"
+  end
+  
+  it "should handle type in object for <= ruby 1.8.7" do
     test_type = FrenchMan::TestType.plan
     test_type[:type].should == 'test'
   end

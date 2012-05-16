@@ -26,16 +26,35 @@ class FrenchMan
         send(:class_variable_set, :@@blueprint, blueprint)
       end
 
-      def self.plan(&block)
+      def self.plan(hash = nil, &block)
         blueprint = send(:class_variable_get, :@@blueprint)
         raise "blueprint is missing" if blueprint.nil?
-        plan = Plan.new &block
+        plan = hash.nil? ? Plan.new(&block) : HashBuild.new(hash)
         blueprint.merge plan.hash
       end
     end
     self.const_set name, clazz
   end
   
+  class HashBuild
+    def initialize(hash)
+      @hash = hash || {}
+    end
+
+    def hash
+      result = {}
+      @hash.each_pair do |key, value|
+        if FrenchMan.const_defined? key.capitalize
+          blueprint = FrenchMan.const_get key.capitalize
+          result.merge! key => blueprint.plan(value)
+        else
+          result.merge! key => value
+        end
+      end
+      ObjectifiedHash.new result
+    end
+  end
+
   # Creates a new plan hash for merging with a blueprint
   class Plan
     undef_method :id if method_defined?(:id)
@@ -88,7 +107,7 @@ class FrenchMan
 
     def method_missing(name, *args) #:nodoc:
       if @attributes.has_key? name
-        value = @attributes[name]
+        value = name.is_a?(Hash) ? self.class.new(@attributes[name]) : @attributes[name]
       else
         @attributes.send name, *args
       end
